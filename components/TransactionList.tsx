@@ -17,8 +17,8 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, onEdit,
   const filteredTransactions = useMemo(() => {
     return transactions
       .filter((t) => {
-        const matchesSearch = t.description.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                              t.vendor?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          t.vendor?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory = filterCategory === 'All' || t.category === filterCategory;
         return matchesSearch && matchesCategory;
       })
@@ -48,9 +48,9 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, onEdit,
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
       {/* Header & Filters */}
-      <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-50/50">
-        <h3 className="text-lg font-bold text-slate-800">Transaction History</h3>
-        
+      <div className="p-3 sm:p-4 border-b border-slate-100 flex flex-col sm:flex-row gap-3 justify-between items-center bg-slate-50/50">
+        <h3 className="text-base sm:text-lg font-bold text-slate-800">Transaction History</h3>
+
         <div className="flex gap-2 w-full sm:w-auto">
           <div className="relative flex-1 sm:w-48">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -76,26 +76,113 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, onEdit,
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+      {/* Mobile Card View */}
+      <div className="block md:hidden">
+        {filteredTransactions.length > 0 ? (
+          <div className="divide-y divide-slate-100">
+            {filteredTransactions.map((t) => (
+              <div key={t.id} className="p-3 hover:bg-blue-50/30 transition-colors">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-slate-800">{t.description}</div>
+                    {t.vendor && <div className="text-xs text-slate-400 mt-0.5">Vendor: {t.vendor}</div>}
+                    <div className="text-xs text-slate-500 mt-1">
+                      {new Date(t.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </div>
+                  </div>
+                  <div className="text-right ml-2">
+                    <div className="text-sm font-bold text-slate-700 whitespace-nowrap">
+                      {formatCurrency(t.amount)}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center mt-2">
+                  <span
+                    className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                    style={{
+                      backgroundColor: `${CATEGORY_COLORS[t.category]}20`,
+                      color: CATEGORY_COLORS[t.category]
+                    }}
+                  >
+                    {t.category}
+                  </span>
+
+                  <div className="flex items-center space-x-1">
+                    {deleteConfirmId === t.id ? (
+                      <>
+                        <button
+                          onClick={() => handleConfirmDelete(t.id)}
+                          className="px-2.5 py-1 text-xs font-semibold bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                          title="Confirm Delete"
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          onClick={handleCancelDelete}
+                          className="p-1 text-slate-500 hover:bg-slate-200 rounded-md transition-colors"
+                          title="Cancel"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => onEdit(t)}
+                          className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
+                          title="Edit"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(t.id)}
+                          className="p-1.5 text-red-600 hover:bg-red-100 rounded-md transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {t.attachmentName && (
+                  <div className="flex items-center text-xs text-blue-500 mt-2">
+                    <FileText className="w-3 h-3 mr-1" />
+                    {t.attachmentName}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="px-4 py-12 text-center text-slate-400">
+            <p className="text-sm">No transactions found.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50 text-slate-500 text-xs uppercase font-semibold tracking-wider">
-              <th className="px-6 py-4">Date</th>
-              <th className="px-6 py-4">Description</th>
-              <th className="px-6 py-4">Category</th>
-              <th className="px-6 py-4 text-right">Amount</th>
-              <th className="px-6 py-4 text-center">Actions</th>
+              <th className="px-4 py-3">Date</th>
+              <th className="px-4 py-3">Description</th>
+              <th className="px-4 py-3">Category</th>
+              <th className="px-4 py-3 text-right">Amount</th>
+              <th className="px-4 py-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filteredTransactions.length > 0 ? (
               filteredTransactions.map((t) => (
                 <tr key={t.id} className="hover:bg-blue-50/30 transition-colors group">
-                  <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
+                  <td className="px-4 py-3 text-sm text-slate-600 whitespace-nowrap">
                     {new Date(t.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-3">
                     <div className="flex flex-col">
                       <span className="text-sm font-medium text-slate-800">{t.description}</span>
                       {t.vendor && <span className="text-xs text-slate-400">Vendor: {t.vendor}</span>}
@@ -107,34 +194,34 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, onEdit,
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <span 
+                  <td className="px-4 py-3">
+                    <span
                       className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                      style={{ 
-                        backgroundColor: `${CATEGORY_COLORS[t.category]}20`, // 20% opacity hex
-                        color: CATEGORY_COLORS[t.category] 
+                      style={{
+                        backgroundColor: `${CATEGORY_COLORS[t.category]}20`,
+                        color: CATEGORY_COLORS[t.category]
                       }}
                     >
                       {t.category}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-4 py-3 text-right">
                     <span className="text-sm font-bold text-slate-700">
                       {formatCurrency(t.amount)}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-3">
                     <div className="flex justify-center items-center space-x-2 h-8">
                       {deleteConfirmId === t.id ? (
                         <>
-                          <button 
+                          <button
                             onClick={() => handleConfirmDelete(t.id)}
                             className="px-3 py-1 text-xs font-semibold bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors shadow-sm"
                             title="Confirm Delete"
                           >
                             Confirm
                           </button>
-                          <button 
+                          <button
                             onClick={handleCancelDelete}
                             className="p-1 text-slate-500 hover:bg-slate-200 rounded-md transition-colors"
                             title="Cancel"
@@ -144,14 +231,14 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, onEdit,
                         </>
                       ) : (
                         <>
-                          <button 
+                          <button
                             onClick={() => onEdit(t)}
                             className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
                             title="Edit"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleDeleteClick(t.id)}
                             className="p-1.5 text-red-600 hover:bg-red-100 rounded-md transition-colors"
                             title="Delete"
@@ -166,7 +253,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, onEdit,
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
+                <td colSpan={5} className="px-4 py-12 text-center text-slate-400">
                   <p className="text-sm">No transactions found.</p>
                 </td>
               </tr>
