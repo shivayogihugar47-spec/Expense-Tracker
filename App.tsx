@@ -5,7 +5,6 @@ import { TOTAL_BUDGET, INITIAL_TRANSACTIONS } from './constants';
 import Dashboard from './components/Dashboard';
 import TransactionList from './components/TransactionList';
 import EntryModal from './components/EntryModal';
-import BudgetAdvisor from './components/BudgetAdvisor';
 import { Plus, LayoutDashboard, List } from 'lucide-react';
 
 // Simple hook to persist state
@@ -142,8 +141,7 @@ const App: React.FC = () => {
         </span>
       </button>
 
-      {/* Gemini Advisor */}
-      <BudgetAdvisor transactions={transactions} />
+   
 
       {/* Modal */}
       <EntryModal
